@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>un site pour toi</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{font-family:Georgia,"Times New Roman",serif;background:linear-gradient(160deg,#ffd6e0,#ffb3c7 55%,#ff8fab);color:#6b1030;display:flex;align-items:center;justify-content:center;overflow:hidden;text-align:center}
+.card{position:relative;z-index:2;background:rgba(255,255,255,.85);border-radius:24px;padding:28px 22px;width:min(90%,420px);box-shadow:0 10px 40px rgba(160,20,70,.25)}
+h1{font-size:1.6rem;margin:0 0 10px}
+p{font-size:1.05rem;line-height:1.5;margin:0 0 18px}
+.emoji{font-size:3rem;margin-bottom:6px}
+.btns{display:flex;gap:14px;justify-content:center;align-items:center;min-height:70px}
+button{font-family:inherit;border:0;border-radius:999px;cursor:pointer;font-size:1.1rem;padding:12px 26px}
+#oui{background:#e0245e;color:#fff;box-shadow:0 4px 14px rgba(224,36,94,.45);transition:transform .2s}
+#non{background:#fff;color:#6b1030;border:2px solid #e0245e;transition:left .25s,top .25s}
+#non.run{position:fixed;z-index:5}
+input{font-size:1.1rem;padding:12px 16px;border-radius:999px;border:2px solid #ff8fab;width:100%;margin-bottom:12px;text-align:center;font-family:inherit}
+#yes{display:none}
+.heart{position:fixed;bottom:-40px;z-index:1;animation:up linear forwards;pointer-events:none}
+@keyframes up{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="card" id="ask">
+  <div class="emoji">💌</div>
+  <h1>Hey toi…</h1>
+  <p>Je ne sais pas si tu as remarqué, mais ton sourire a mis ma journée sens dessus dessous.<br>Alors j’ose te demander : <b>me ferais-tu l’honneur de me donner ton numéro s'il te plait Jordane ?</b> 🥺</p>
+  <div class="btns">
+    <button id="oui">Oui 💖</button>
+    <button id="non">Non</button>
+  </div>
+</div>
+
+<div class="card" id="yes">
+  <div class="emoji">🥰</div>
+  <h1>Yesss !</h1>
+  <p>Tu viens de faire battre mon cœur un peu plus vite. Écris ton numéro ci-dessous, je te promets de bien en prendre soin ✨</p>
+  <input id="tel" type="tel" inputmode="tel" placeholder="Ton numéro 📱">
+  <button id="send" style="background:#e0245e;color:#fff">Envoyer 💌</button>
+</div>
+
+<script>
+var MON_NUMERO = "+33743634148";
+
+var non = document.getElementById("non"), oui = document.getElementById("oui");
+var phrases = ["Non","Tu es sûre ? 🥺","Réfléchis bien 💭","Allez, un petit oui ? 🥹","Je suis gentil, promis 😇","Essaie encore 😏","Impossible d’appuyer 😘"];
+var n = 0, scale = 1;
+
+function fuir(e){
+  if(e){ e.preventDefault(); }
+  n++; scale = Math.min(scale + 0.15, 2);
+  oui.style.transform = "scale(" + scale + ")";
+  non.textContent = phrases[n % phrases.length];
+  non.classList.add("run");
+  var w = window.innerWidth - non.offsetWidth - 16;
+  var h = window.innerHeight - non.offsetHeight - 16;
+  non.style.left = Math.max(8, Math.random() * w) + "px";
+  non.style.top = Math.max(8, Math.random() * h) + "px";
+  coeur();
+}
+["mouseover","touchstart","click","focus"].forEach(function(ev){ non.addEventListener(ev, fuir, {passive:false}); });
+
+function coeur(){
+  var h = document.createElement("div");
+  h.className = "heart";
+  h.textContent = ["💖","💕","💗","💘"][Math.floor(Math.random()*4)];
+  h.style.left = Math.random()*100 + "vw";
+  h.style.fontSize = (18 + Math.random()*26) + "px";
+  h.style.animationDuration = (4 + Math.random()*4) + "s";
+  document.body.appendChild(h);
+  setTimeout(function(){ h.remove(); }, 8500);
+}
+setInterval(coeur, 900);
+
+oui.addEventListener("click", function(){
+  document.getElementById("ask").style.display = "none";
+  non.style.display = "none";
+  document.getElementById("yes").style.display = "block";
+  for(var i=0;i<25;i++){ setTimeout(coeur, i*80); }
+});
+
+document.getElementById("send").addEventListener("click", function(){
+  var t = document.getElementById("tel").value.trim();
+  if(!t){ document.getElementById("tel").focus(); return; }
+  var msg = encodeURIComponent("Coucou 💌 Voici mon numéro : " + t);
+  window.location.href = "sms:" + MON_NUMERO + "?&body=" + msg;
+});
+</script>
+</body>
+</html>
